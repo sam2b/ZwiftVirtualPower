@@ -2,7 +2,7 @@ var username = "";
 var password = "";
 var riderID = "";
 var startingLevel = 8; // The level at zero degrees grade.  If too easy, increase value.
-var maxLevel; // = 18; // the quantity of rows in the array in Speedmeter.js  The highest resistance level of your machine.
+var maxLevel; // the quantity of rows in the array in Speedmeter.js  The highest resistance level of your machine.
 
 // -------------- Do not edit below this line --------------
 
@@ -31,7 +31,7 @@ Zwifter.prototype.start = function() {
 // run this function every x second(s)
 function refreshData() {
     var floatSlope;
-    var slopeAlt;
+    //var slopeAlt;
     //console.log("REFRESHING DATA");
     world.riderStatus(riderID).then(status => {
         var xNow = status.riderStatus.x;
@@ -44,8 +44,8 @@ function refreshData() {
         var run = Math.sqrt(Math.pow((xNow - xOld), 2) + Math.pow((yNow - yOld), 2));
         if (run != 0) {
             floatSlope = (rise / run) * 50; // Percentage, but divided by 2, hence 50=100/2.  By design on Zwift.
-            slopeAlt = (rise / run) * 100; // Percentage, but divided by 2, hence 50=100/2.  By design on Zwift.
-            slopeAlt = Math.round(slopeAlt);
+            //slopeAlt = (rise / run) * 100;
+            //slopeAlt = Math.round(slopeAlt);
             slope = Math.round(floatSlope);
         } else {
             floatSlope = 0;
@@ -83,12 +83,10 @@ function refreshData() {
 }
 
 Zwifter.prototype.getLevelRequested = function() {
-    //level = level || startingLevel;
     return level;
 }
 
 Zwifter.prototype.getGrade = function() {
-    //slope = slope || 0;
     return slope;
 }
 
