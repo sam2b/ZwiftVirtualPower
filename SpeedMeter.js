@@ -143,19 +143,17 @@ var SpeedMeter = function(SensorPin, levelUpPin, levelDownPin, resistUpPin, resi
         if (idxUpper > 1 && idxUpper <= 12) {
             upperVal = power[level - 1][idxUpper - 2];
 
-        } else if (idxUpper > 20) {
+        } else if (idxUpper > 20) { // Possibly happens if using a strong magnet which induces current.
             // Happens when RPM > 200.
-            //console.log("RPM(", rpm, ") out of range");
-            rpm = oldRPM; //rpm /= 4.5; // approximate down to 53RPM, not zero.
+            console.log("RPM(", rpm, ") out of range");
+            rpm /= 4.5; //rpm = oldRPM; // approximate down to 53RPM, not zero.
         } else if (idxUpper <= 1) {
              idxUpper = 0;
-        } else {
-            oldRPM = rpm; // The last known good rpm value.
         }
 
-        if (idxUpper == 0 && idxLower == 0) {
+        if (idxUpper == 0 && idxLower == 0 && rpm > 0) {
+          console.log("----------- idxUpper == 0 && idxLower == 0 ------------");
           return 0;
-          // console.log("----------- idxUpper == 0 && idxLower == 0 ------------");
         }
                 
         result = (upperVal - lowerVal) / (idxUpper * 10 - idxLower * 10) * (rpm - idxLower * 10) + lowerVal;
@@ -167,29 +165,26 @@ var SpeedMeter = function(SensorPin, levelUpPin, levelDownPin, resistUpPin, resi
         if (upperVal == lowerVal) {
           console.log("[[[[[[[[[[[ upperVal == lowerVal ]]]]]]]]]]");
         } */
-        /* if (isNaN(result)) {
-          console.log("============ RESULT IS NaN =============");
-        } */
 
         // Fix for power drop out.
-        if(result==0 || isNaN(result)) {
-          /* console.log("===================================");
+        if(rpm > 0 && (result==0 || isNaN(result))) {
+          /*console.log("========RESULT IS NaN ==============");
           console.log("upperVal = " + upperVal);
           console.log("lowerVal = " + lowerVal);
           console.log("idxUpper = " + idxUpper);
           console.log("idxLower = " + idxLower);
           console.log("rpm = " + rpm);
-          console.log("==================================="); */
+          console.log("====================================");*/
         } else {
             /* Store the last known good value.
-               This solves issue of the appearance of a power dropout.
+               This solves issue of the appearance of a power dropout,
+               and should keep you moving in Zwift.
                It is not an ANT+ issue.
                Necessary for the occasional result equaling zero or NaN 
                whenever upperVal==lowerVal or idxUpper==idxLower.
             */
             oldPower = result; 
         }
-        
         return result || oldPower; // Only return a positive number.
       };
       
