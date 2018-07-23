@@ -145,14 +145,14 @@ var SpeedMeter = function(SensorPin, levelUpPin, levelDownPin, resistUpPin, resi
 
         } else if (idxUpper > 20) { // Possibly happens if using a strong magnet which induces current.
             // Happens when RPM > 200.
-            console.log("RPM(", rpm, ") out of range");
+            console.log("RPM(", rpm, ") out of range.  Fake rpm is set to " + rpm/4.5);
             rpm /= 4.5; //rpm = oldRPM; // approximate down to 53RPM, not zero.
         } else if (idxUpper <= 1) {
              idxUpper = 0;
         }
 
         if (idxUpper == 0 && idxLower == 0 && rpm > 0) {
-          console.log("----------- idxUpper == 0 && idxLower == 0 ------------");
+          //console.log("----------- idxUpper == 0 && idxLower == 0 ------------");
           return 0;
         }
                 
@@ -168,6 +168,7 @@ var SpeedMeter = function(SensorPin, levelUpPin, levelDownPin, resistUpPin, resi
 
         // Fix for power drop out.
         if(rpm > 0 && (result==0 || isNaN(result))) {
+          console.log("                                WORKAROUND, using oldPower = " + oldPower);
           /*console.log("========RESULT IS NaN ==============");
           console.log("upperVal = " + upperVal);
           console.log("lowerVal = " + lowerVal);
