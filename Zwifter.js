@@ -49,9 +49,7 @@ function refreshData() {
         var rise = altitudeNow - altitudeOld;
         var run = Math.sqrt(Math.pow((xNow - xOld), 2) + Math.pow((yNow - yOld), 2));
         if (run != 0) {
-            floatSlope = (rise / run) * multiplier; // Half slope.  Watopia.
-            //slopeAlt = (rise / run) * 100; // Full slope. London
-            //slopeAlt = Math.round(slopeAlt);
+            floatSlope = (rise / run) * multiplier; // Watopia uses 50 for the multiplier.
             slope = Math.round(floatSlope);
         } else {
             floatSlope = 0;
@@ -59,8 +57,7 @@ function refreshData() {
         }
         
         // Debugging ///////////////////////////////
-        //console.log("grade: " + slope + "%,  Alt: " + slopeAlt + "%");
-        //console.log(floatSlope + "%");
+        //console.log("grade: " + slope + "% + ", " + floatSlope + "%");
         //console.log(" ");
         ////////////////////////////////////////////
         
@@ -80,7 +77,7 @@ function refreshData() {
                 level = tempLevel;
             }
         }
-        // Lastly, the current values become the old values for the next loop itteration.
+        // Lastly, the current values become the old values for the next loop iteration.
         xOld = xNow;
         yOld = yNow;
         altitudeOld = altitudeNow;
@@ -88,55 +85,49 @@ function refreshData() {
     setTimeout(refreshData, timeOut*1000); //infinite loop.
 }
 
+function getUtcDate() {
+    var ymd = new Date().toISOString().split("T")[0].split("-");
+    var utc = Date.UTC(ymd[0], (ymd[1]-1), ymd[2]);
+    var today = new Date(utc).toISOString().split("T")[0];
+    return today;
+}
+
 function slopeMultipier() {
+    var urlSchedule = "http://cdn.zwift.com/gameassets/MapSchedule.xml";
     var request = require('request');
     var parser = require('xml2json');
-    var today = new Date().toISOString().split("T")[0].toString(); //today
-    console.log("Today is " + today);
+    var today = getUtcDate();
     var previousDate = today;
     var previousMap = "";
     var theMap;
     var zDate;
 
-    request.get('http://cdn.zwift.com/gameassets/MapSchedule.xml', function (error, response, body) {
+    request.get(urlSchedule, function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            theMap = doWorky(body);
-            //LONDON, RICHMOND, WATOPIA
+            var json = parser.toJson(body);
+            var obj = JSON.parse(json);
+            var array = obj.MapSchedule.appointments.appointment;
+            var thing = array[0]; //all appointments.
+            var returnedString;
+            Object.keys(array).forEach(function(key) {
+                var stuff = array[key]; // two elements of each appointment, map and start.
+                var values = Object.keys(stuff).map(function(e) {
+                   return stuff[e];
+                });
+                var mapDate = values[1].split("T")[0].toString();
+                //console.log("I am " + (today>=previous));
+                if (today>=previousDate && today<mapDate) { //string comparisons.
+                   returnedString = previousMap;
+                }
+                previousDate = mapDate;
+                previousMap = values[0];
+            });
+            theMap = returnedString;
+            multiplier = (theMap == "WATOPIA") ? 50 : 100;
+            console.log("Map is " + theMap + ", " + today + ", Multiplier = " + multiplier);
+            console.log("");
         }
-    } );
-
-    function doWorky(myData) {
-       var json = parser.toJson(myData);
-       var obj = JSON.parse(json);
-       var array = obj.MapSchedule.appointments.appointment;
-       var thing = array[0]; //all appointments.
-       var returnedString;
-       Object.keys(array).forEach(function(key) {
-          var stuff = array[key]; // two elements of each appointment, map and start.
-          var values = Object.keys(stuff).map(function(e) {
-             return stuff[e];
-          });
-          var mapDate = values[1].split("T")[0].toString();
-          //console.log(mapDate); //this element's start date.
-          //console.log("today=" + today + ", previousDate=" + previousDate + ", mapDate=" + mapDate);
-          //test(today, mapDate);
-          //console.log("I am " + (today>=previous));
-          if (today>=previousDate && today<mapDate) { //string comparisons.
-             //theMap = previousMap; //the name of the map.
-             //console.log(theMap);
-             returnedString = previousMap;
-          }
-          previousDate = mapDate;
-          previousMap = values[0];
-       });
-       return returnedString;
-    }        
-
-    //Hackaround to wait until the asynchronous assignment to theMap is complete.
-    setTimeout(function() {
-        multiplier = (theMap == "WATOPIA") ? 50 : 100;
-        console.log("Map is " + theMap + ", Multiplier = " + multiplier);
-    }, 1000);
+    });
 }
 
 Zwifter.prototype.getLevelRequested = function() {
