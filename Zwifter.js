@@ -105,25 +105,25 @@ function slopeMultipier() {
     request.get(urlSchedule, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var json = parser.toJson(body);
-            var obj = JSON.parse(json);
-            var array = obj.MapSchedule.appointments.appointment;
-            var thing = array[0]; //all appointments.
-            var returnedString;
-            Object.keys(array).forEach(function(key) {
-                var stuff = array[key]; // two elements of each appointment, map and start.
-                var values = Object.keys(stuff).map(function(e) {
-                   return stuff[e];
-                });
-                var mapDate = values[1].split("T")[0].toString();
-                //console.log("I am " + (today>=previous));
-                if (today>=previousDate && today<mapDate) { //string comparisons.
-                   returnedString = previousMap;
-                }
-                previousDate = mapDate;
-                previousMap = values[0];
-            });
+       var obj = JSON.parse(json);
+       var array = obj.MapSchedule.appointments.appointment;
+       var thing = array[0]; //all appointments.
+       var returnedString;
+       Object.keys(array).forEach(function(key) {
+          var stuff = array[key]; // two elements of each appointment, map and start.
+          var values = Object.keys(stuff).map(function(e) {
+             return stuff[e];
+          });
+          var mapDate = values[1].split("T")[0].toString();
+          //console.log("I am " + (today>=previous));
+          if (today>=previousDate && today<mapDate) { //string comparisons.
+             returnedString = previousMap;
+          }
+          previousDate = mapDate;
+          previousMap = values[0];
+       });
             theMap = returnedString;
-            multiplier = (theMap == "WATOPIA") ? 50 : 100;
+        multiplier = (theMap == "WATOPIA") ? 50 : 100;
             console.log("Map is " + theMap + ", " + today + ", Multiplier = " + multiplier);
             console.log("");
         }

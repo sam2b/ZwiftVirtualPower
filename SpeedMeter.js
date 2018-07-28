@@ -5,6 +5,7 @@ var onoff = require('onoff').Gpio; //include onoff to interact with the GPIO
 var relay;
 var maxLevel;
 var autoMode = true;
+var offset = 0;
 var oldPower = 0;
 var oldRPM = 0;
 
@@ -81,7 +82,7 @@ var SpeedMeter = function(SensorPin, levelUpPin, levelDownPin, resistUpPin, resi
                 if (!autoMode && (timeLevelUp - timeLevel) > bounceTime) {
                     if (level < maxLevel) {
                       ++level;
-                      console.log("     MANUAL LEVEL " + level);
+                      console.log("    MANUAL  LEVEL " + level);
                     }
                     timeLevel = timeLevelUp;
                 }
@@ -143,7 +144,7 @@ var SpeedMeter = function(SensorPin, levelUpPin, levelDownPin, resistUpPin, resi
         if (idxUpper > 1 && idxUpper <= 12) {
             upperVal = power[level - 1][idxUpper - 2];
 
-        } else if (idxUpper > 20) { // Possibly happens if using a strong magnet which induces current.
+        } else if (idxUpper > 20) { // Possibly happens if using a strong magnet which induces current to the wires which causes a false positive.
             // Happens when RPM > 200.
             console.log("RPM(", rpm, ") out of range.  Fake rpm is set to " + rpm/4.5);
             rpm /= 4.5; //rpm = oldRPM; // approximate down to 53RPM, not zero.
@@ -169,13 +170,13 @@ var SpeedMeter = function(SensorPin, levelUpPin, levelDownPin, resistUpPin, resi
         // Fix for power drop out.
         if(rpm > 0 && (result==0 || isNaN(result))) {
           console.log("                                WORKAROUND, using oldPower = " + oldPower);
-          /*console.log("========RESULT IS NaN ==============");
+          console.log("========RESULT IS " + result + " ==============");
           console.log("upperVal = " + upperVal);
           console.log("lowerVal = " + lowerVal);
           console.log("idxUpper = " + idxUpper);
           console.log("idxLower = " + idxLower);
           console.log("rpm = " + rpm);
-          console.log("====================================");*/
+          console.log("====================================");
         } else {
             /* Store the last known good value.
                This solves issue of the appearance of a power dropout,
@@ -196,6 +197,7 @@ var SpeedMeter = function(SensorPin, levelUpPin, levelDownPin, resistUpPin, resi
     this.setAutoMode = function(value) {
         autoMode = value;
     }
+    
 };
 
 // If using a reed switch, 0 is on, and 1 is off, and relay = new onoff(theGPIOpin, 'in');
