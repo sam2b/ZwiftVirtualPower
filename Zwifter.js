@@ -1,6 +1,6 @@
-var username = "sam2b@protonmail.com";
-var password = ".Sammyb11";
-var riderID = "712834";
+var username = "your zwift username";
+var password = "your zwift password";
+var riderID = "your zwift rider ID";
 var startingLevel = 8; // The level at zero degrees grade.  If too easy, increase value.
 var maxLevel; // The quantity of rows in the array in Speedmeter.js  The highest resistance level of your machine.
 
