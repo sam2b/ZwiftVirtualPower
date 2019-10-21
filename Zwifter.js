@@ -9,7 +9,7 @@ var maxLevel; // The quantity of rows in the array in Speedmeter.js  The highest
 var ZwiftAccount = require("zwift-mobile-api");
 var account = new ZwiftAccount(username, password);
 var world = account.getWorld(1);
-var timeOut = 2; // Do not change this value, else grade will be terribly inaccurate!
+var timeOut = 2.5; // Do not change this value, else grade will be terribly inaccurate!
 var tempGrade;
 var tempLevel;
 var xOld;
@@ -93,7 +93,8 @@ function getUtcDate() {
 }
 
 function slopeMultipier() {
-    var urlSchedule = "http://cdn.zwift.com/gameassets/MapSchedule.xml";
+    var urlSchedule = "http://192.168.1.101:8080/static/MapSchedule.xml";
+    //  Formerly located here: http://cdn.zwift.com/gameassets/MapSchedule.xml
     var request = require('request');
     var parser = require('xml2json');
     var today = getUtcDate();
